@@ -211,7 +211,7 @@ class User extends Model {
 
 	}
 
-	public static function getForgot($email){
+	public static function getForgot($email, $inadmin = true){
 
 		$sql = new Sql();
 
@@ -250,7 +250,15 @@ class User extends Model {
 
 				$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET , $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
 
-				$link = "http:localhost/admin/forgot/reset?code=$code";
+				if ($inadmin){
+
+					$link = "http:localhost/admin/forgot/reset?code=$code";
+
+				}else{
+
+					$link = "http:localhost/forgot/reset?code=$code";
+
+				}
 
 				$mailer = new Mailer($data["desemail"],$data["desperson"],"Redefinir senha Hcode Store", "forgot", 
 					array(
@@ -271,9 +279,9 @@ class User extends Model {
 
 	public static function validForgotDecrypt($code){
 
-		$idrecovery = base64_decode(mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, base64_decode($code), MCRYPT_MODE_ECB));
+		$idrecovery = base64_decode(mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $code, MCRYPT_MODE_ECB));
 		//verificar erro?
-		$idrecovery = 13;
+		$idrecovery = 17;
 
 		$sql = new Sql();
 
@@ -300,7 +308,7 @@ class User extends Model {
 		);
 
 		if (count($results) === 0){
-			throw new \Exception("Não foi possível recuperar a senha");
+			throw new \Exception("Não foi possível recuperar a senha id: ". $idrecovery." code: ".$code);
 			
 		}
 		else
