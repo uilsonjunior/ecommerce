@@ -10,15 +10,17 @@ $app->get('/admin/', function() {
 	//var_dump($_SESSION);
 	//var_dump((bool)$_SESSION[User::SESSION]["inadmin"]);
 //
-	if ( User::verifyLogin() == true ){
+	//if ( User::verifyLogin() == true ){
+
+	User::verifyLogin();
 
 	$pageAdm = new PageAdmin();
 
 	$pageAdm->setTpl("index");
-	} else {
-		header("Location: /admin/login/");
-		exit;
-	}
+	//} else {
+	//	header("Location: /admin/login/");
+	//	exit;
+	//}
 });
 
 $app->get('/admin/login/', function() {

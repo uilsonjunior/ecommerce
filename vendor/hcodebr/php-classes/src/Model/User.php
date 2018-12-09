@@ -10,6 +10,8 @@ class User extends Model {
 
 	const SESSION = "User";
 	const SECRET = "HcodePhp7_Secret";
+	const ERROR = "UserErro";
+	const ERROR_REGISTER = "userErroRegister";
 
 	public static function getFromSession(){
 
@@ -18,6 +20,9 @@ class User extends Model {
 		if(isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0 ){
 
 			$user->setData($_SESSION[User::SESSION]);
+
+		}else{
+
 
 		}
 
@@ -31,7 +36,7 @@ class User extends Model {
 
 			!isset($_SESSION[User::SESSION]) 
 			|| 
-			$_SESSION[User::SESSION] 
+			!$_SESSION[User::SESSION] 
 			|| 
 			!(int)$_SESSION[User::SESSION]["iduser"] > 0  
 
@@ -42,7 +47,7 @@ class User extends Model {
 
 		}else{
 
-			if ($inadmin === true && (bool)$_SESSION[User::SESSION]["iduser"] === true){
+			if ($inadmin === true && (bool)$_SESSION[User::SESSION]["inadmin"] === true){
 
 				return true;
 
@@ -60,11 +65,43 @@ class User extends Model {
 
 	}
 
+	public static function verifyLogin( $inadmin = true){
+
+		//if ( 
+		//	!isset($_SESSION[User::SESSION]) 
+		//	|| 
+			//$_SESSION[User::SESSION] 
+			//|| 
+		//	!(int)$_SESSION[User::SESSION]["iduser"] > 0  
+		//	|| 
+		//	(bool)$_SESSION[User::SESSION]["inadmin"] != $inadmin
+		//){
+		if (!User::checkLogin($inadmin)){
+			
+			if ($inadmin){
+
+				header("Location: /admin/login");
+				
+			}else{
+				header("Location: /login");
+			}
+
+			exit;
+		//	return false;
+		}
+		//else return true;
+
+	}
+
 	public static function login ($login, $password){
 
 		$sql = new Sql();
 
-		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+		$results = $sql->select("
+							SELECT * 
+							FROM tb_users a
+							INNER JOIN tb_persons b 
+									ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
 			":LOGIN"=>$login
 		));
 
@@ -95,23 +132,7 @@ class User extends Model {
 
 	}
 
-	public static function verifyLogin( $inadmin = true){
 
-		if ( 
-			!isset($_SESSION[User::SESSION]) 
-			|| 
-			//$_SESSION[User::SESSION] 
-			//|| 
-			!(int)$_SESSION[User::SESSION]["iduser"] > 0  
-			|| 
-			(bool)$_SESSION[User::SESSION]["inadmin"] != $inadmin
-		){
-			//header("Location: /admin/login");
-			//exit;
-			return false;
-		}else return true;
-
-	}
 
 	public static function logout(){
 
@@ -312,6 +333,30 @@ class User extends Model {
 
 	}
 
+	public static function setError($msg){
+		$_SESSION[User::ERROR] = $msg;
+	}
+
+	public static function getError(){
+
+		$msg = (isset($_SESSION[User::ERROR]) && $_SESSION[User::ERROR]) ? $_SESSION[User::ERROR] : "";
+
+		User::clearError();
+
+		return $msg;
+	}
+
+	public static function clearError(){
+		$_SESSION[User::ERROR] = NULL;
+	}
+
+	public static function getPasswordHash($password){
+
+		return password_hash($password, PASSWORD_DEFAULT,[
+			'cost'=>12
+		]);
+
+	}
 
 }
 
