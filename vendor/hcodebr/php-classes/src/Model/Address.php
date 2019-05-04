@@ -74,6 +74,20 @@ class Address extends Model {
 		}
 
 	}
+
+	public function getEndereco($idperson){
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT idaddress FROM tb_addresses WHERE idperson = :idperson",[
+			":idperson"=>$idperson
+		]);
+
+		if (count($results) > 0){
+			$this->setData($results[0]);
+		}
+
+	}
 	
 }
 ?>

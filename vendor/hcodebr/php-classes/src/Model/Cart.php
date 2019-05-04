@@ -212,6 +212,19 @@ class Cart extends Model {
 
 	}
 
+	/*public function getVlFreight($idcart){
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT vlfreight FROM tb_carts WHERE idcart = :idcart",[
+							":idcart"=>$idcart]
+						);
+
+		if(count($results) > 0){
+			return $results[0];
+		}
+	}*/
+
 	public function setFreight($nrzipcode){
 
 		$urlws = "http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/";

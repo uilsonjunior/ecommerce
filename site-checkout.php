@@ -3,6 +3,8 @@
 use \Hcode\Model\User;
 use \Hcode\Model\Cart;
 use \Hcode\Model\Address;
+use \Hcode\Model\Order;
+use \Hcode\Model\OrderStatus;
 use \Hcode\Page;
 
 $app->get("/checkout", function(){
@@ -121,9 +123,27 @@ $app->post("/checkout", function(){
 
 	$address->setData($_POST);
 
+	$address->getEndereco($user->getidperson());
+
 	$address->save();
 
-	header("Location: /order");
+	$cart = Cart::getFromSession();
+
+	$totais = $cart->getProductsTotals();
+
+	$order = new order();
+
+	$order->setData([
+		"idcart"=>$cart->getidcart(),
+		"idaddress"=>$address->getidaddress(),
+		"iduser"=>$user->getiduser(),
+		"idstatus"=>OrderStatus::EM_ABERTO,
+		"vltotal"=>$totais['vlprice'] + $cart->getVlFreight()
+	]);
+
+	$order->save();
+	
+	header("Location: /order/".$order->getidorder());
 	exit;
 
 });
