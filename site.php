@@ -6,12 +6,15 @@ use \Hcode\Model\Category;
 use \Hcode\Model\Cart;
 use \Hcode\Model\Address;
 use \Hcode\Model\User;
+use \Hcode\Model\Order;
 
 $app->get('/', function() {
 	
 	$products = Product::listAll();	
 
 	$page = new Page();
+
+	$cart = Cart::getFromSession();
 
 	$page->setTpl("index",[
 		"products"=>Product::checkList($products)
@@ -304,6 +307,46 @@ $app->post("/profile", function(){
 	header("Location: /profile");
 	exit;
 
-})
+});
+
+$app->get("/profile/orders", function(){
+
+	User::verifyLogin(false);
+
+	$user = User::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("profile-orders",[
+		'orders'=>$user->getOrders()
+	]);
+
+});
+
+$app->get("/profile/orders/:idorder", function($idorder){
+
+	User::verifyLogin(false);
+
+	$order = new Order();
+
+	$order->get((int)$idorder);
+
+	$cart = new Cart();
+
+	$cart->getProductsTotals();
+
+	$cart->getCalculateTotal((int)$order->getidcart());
+
+	$cart->get((int)$order->getidcart());
+
+	$page = new Page();
+
+	$page->setTpl("profile-orders-detail",[
+		'order'=>$order->getValues(),
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts()
+	]);
+
+});
 
 ?>

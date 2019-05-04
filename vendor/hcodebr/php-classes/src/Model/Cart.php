@@ -194,6 +194,8 @@ class Cart extends Model {
 
 		$sql = new Sql();
 
+		
+
 		$results = $sql->select("
 				SELECT SUM(a.vlprice) AS vlprice, SUM(a.vlwidth) AS vlwidth, SUM(a.vlweight) AS vlweight, 
 					   SUM(a.vlheight) AS vlheight, SUM(a.vllength) AS vllength, COUNT(*) AS nrqtd
@@ -204,26 +206,54 @@ class Cart extends Model {
 				":idcart"=>$this->getidcart()
 			]);
 
-		if(count($results) > 0){
+		return $this->getidcart();
+
+	/*	if(count($results) > 0){
 			return $results[0];
 		}else{
 			return [];
 		}
-
+*/
 	}
 
-	/*public function getVlFreight($idcart){
+	public function getCalculateTotal($idorder){
 
 		$sql = new Sql();
 
-		$results = $sql->select("SELECT vlfreight FROM tb_carts WHERE idcart = :idcart",[
-							":idcart"=>$idcart]
-						);
+		$results = $sql->select("
+			SELECT a.vltotal as vlsubtotal , b.vlfreight + a.vltotal as vltotal, b.vlfreight
+					FROM tb_orders as a
+					INNER JOIN tb_carts as b ON a.idcart = b.idcart
+						WHERE a.idorder = :idorder", 
+			[
+				":idorder"=>$idorder 
+			]);		
+		if(count($results) > 0) $this->setData($results[0]);
+
+
+	}
+
+	public function getCartTotal($idOrder){
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+				SELECT SUM(d.vltotal) + SUM(c.vlfreight) AS total
+				FROM  tb_carts as c
+				INNER JOIN tb_orders         d ON c.idcart   = d.idcart
+				WHERE c.idcart = :idcart 
+						AND d.idorder = :idorder
+			", [
+				":idcart"=>$this->getidcart(),
+				":idorder"=>$idOrder
+			]);
 
 		if(count($results) > 0){
-			return $results[0];
+			return $results;
+		}else{
+			return 0;
 		}
-	}*/
+	}
 
 	public function setFreight($nrzipcode){
 

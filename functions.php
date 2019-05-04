@@ -1,6 +1,7 @@
 <?php
 
 Use \Hcode\Model\User;
+Use \Hcode\Model\Cart;
 
 	function formatPrice($vlprice){
 
@@ -24,5 +25,26 @@ Use \Hcode\Model\User;
 		return $user->getdesperson();
 
 	}
+
+	function getCartNrQtd(){
+
+		$cart = Cart::getFromSession();
+
+		$totals = $cart->getProductTotals();
+
+		return $totals['nrqtd']>0?$totals['nrqtd']:0;
+
+	}
+
+	function getCartVlSubTotals(){
+
+		$cart = Cart::getFromSession();
+
+		$totals = $cart->getProductTotals();
+
+		return formatPrice($totals['vlprice']);
+
+	}
+
 
 ?>	
