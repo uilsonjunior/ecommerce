@@ -8,12 +8,35 @@ $app->get('/admin/users', function(){
 
 	User::verifyLogin();
 
-	$users = User::listAll();
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+
+	$pag = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+
+	if ($search != ''){
+		$pagination = User::getPageSearch($search,$pag,3);
+	}
+	else{
+		$pagination = User::getPage($pag,3);
+	}
+
+	$pags = [];
+
+	for ($i=1; $i < $pagination['pages']; $i++) { 
+		array_push($pags, [
+			'href'=>'/admin/users?'.http_build_query([
+					'page'=>$i,
+					'search'=>$search
+				]),
+			'text'=>$i
+			]);
+	}
 
 	$page = new PageAdmin();
 
 	$page->setTpl("users", array(
-		"users"=>$users
+		"users"=>$pagination['data'],
+		"search"=>$search,
+		"pages"=> $pags
 	));
 
 });
